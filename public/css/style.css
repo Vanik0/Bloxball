@@ -475,3 +475,13 @@ textarea {
     align-items: flex-start;
   }
 }
+#matches-scroll {
+  max-height: 275px;
+  overflow-y: auto;
+  overflow-x: auto;
+  border-radius: 10px;
+}
+
+#matches-scroll table tbody tr {
+  border-bottom: 1px solid var(--line);
+}
