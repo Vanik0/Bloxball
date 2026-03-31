@@ -1,0 +1,138 @@
+<%- include('partials/header', { title: 'Bloxball | Soutěž panel' }) %>
+
+<section class="hero small">
+  <p class="eyebrow">COMPETITION CONTROL</p>
+  <h1><%= competition.name %> - panel soutěže</h1>
+  <p>Formát: <strong><%= isCup ? 'Cup' : 'Liga' %></strong></p>
+  <form action="/competition/logout" method="POST">
+    <button type="submit" class="logout">Odhlásit soutěž</button>
+  </form>
+</section>
+
+<section class="panel admin-section">
+  <h2>Přidat zápas do soutěže</h2>
+  <% if (!allClubs || allClubs.length < 2) { %>
+    <p>Nejdřív přidej alespoň 2 týmy do této soutěže v admin panelu.</p>
+  <% } %>
+  <form class="form-grid" method="POST" action="/competition/matches/create">
+    <label>Domácí
+      <select name="home_club_id" required <%= !allClubs || allClubs.length < 2 ? 'disabled' : '' %>>
+        <% allClubs.forEach(club => { %><option value="<%= club.id %>"><%= club.name %></option><% }) %>
+      </select>
+    </label>
+    <label>Hosté
+      <select name="away_club_id" required <%= !allClubs || allClubs.length < 2 ? 'disabled' : '' %>>
+        <% allClubs.forEach(club => { %><option value="<%= club.id %>"><%= club.name %></option><% }) %>
+      </select>
+    </label>
+    <label>Skóre domácích <input type="number" name="home_score" value="0" required /></label>
+    <label>Skóre hostů <input type="number" name="away_score" value="0" required /></label>
+    <label>Výkop <input name="kickoff" placeholder="2026-03-30 19:30" required /></label>
+    <label>Stav <input name="status" placeholder="LIVE / UPCOMING / FT" required /></label>
+    <label>Kolo <input type="number" min="1" name="round_number" value="1" required /></label>
+    <button type="submit">Uložit zápas</button>
+  </form>
+</section>
+
+<% if (!isCup) { %>
+  <section class="panel admin-section">
+    <h2>Tabulka soutěže</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Tým</th>
+            <th>Z</th>
+            <th>V</th>
+            <th>R</th>
+            <th>P</th>
+            <th>Skóre</th>
+            <th>RG</th>
+            <th>Body</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (!standings || standings.length === 0) { %>
+            <tr><td colspan="9">Zatím nejsou přiřazené žádné týmy.</td></tr>
+          <% } %>
+          <% (standings || []).forEach((row, index) => { %>
+            <tr>
+              <td><%= index + 1 %></td>
+              <td><%= row.club_name %></td>
+              <td><%= row.played %></td>
+              <td><%= row.wins %></td>
+              <td><%= row.draws %></td>
+              <td><%= row.losses %></td>
+              <td><%= row.gf %>:<%= row.ga %></td>
+              <td><%= row.gd %></td>
+              <td><strong><%= row.points %></strong></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+<% } %>
+
+<% if (isCup) { %>
+  <section class="panel admin-section">
+    <h2>Pohárový pavouk</h2>
+    <% if (cupBracketRounds && cupBracketRounds.length > 0) { %>
+      <div class="cup-bracket-wrap">
+        <div class="cup-bracket">
+        <% cupBracketRounds.forEach((round, roundIndex) => { %>
+          <% const isLastRound = roundIndex === cupBracketRounds.length - 1; %>
+          <section class="bracket-round round-<%= roundIndex %>">
+            <h4 class="bracket-round-title"><%= round.label %></h4>
+            <% round.matches.forEach((match, matchIndex) => { %>
+              <% const verticalClass = matchIndex % 2 === 0 ? 'connector-down' : 'connector-up'; %>
+              <article class="bracket-match match-<%= matchIndex %> <%= !isLastRound ? verticalClass : '' %>">
+                <div class="bracket-team-row">
+                  <strong><%= match.home_name %></strong>
+                  <span><%= match.home_score %></span>
+                </div>
+                <div class="bracket-team-row">
+                  <strong><%= match.away_name %></strong>
+                  <span><%= match.away_score %></span>
+                </div>
+                <div class="bracket-meta">Duel <%= match.tie_number || 1 %>, zápas <%= match.leg_number || 1 %> | <%= match.status %></div>
+                <% if (!isLastRound) { %><span class="bracket-line-right"></span><% } %>
+                <% if (roundIndex > 0) { %><span class="bracket-line-left"></span><% } %>
+              </article>
+            <% }) %>
+          </section>
+        <% }) %>
+        </div>
+      </div>
+    <% } else { %>
+      <p>Zatím nejsou vygenerované zápasy do pohárového pavouka.</p>
+    <% } %>
+  </section>
+<% } %>
+
+<% if (!isCup) { %>
+  <section class="panel admin-section">
+    <h2>Zápasy v soutěži <%= competition.name %></h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Kolo</th><th>Zápas</th><th>Skóre</th><th>Výkop</th><th>Stav</th></tr>
+        </thead>
+        <tbody>
+          <% matches.forEach(match => { %>
+            <tr>
+              <td><%= match.round_number || 1 %></td>
+              <td><%= match.home_name %> vs <%= match.away_name %></td>
+              <td><%= match.home_score %> : <%= match.away_score %></td>
+              <td><%= match.kickoff %></td>
+              <td><span class="status"><%= match.status %></span></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </section>
+<% } %>
+
+<%- include('partials/footer') %>

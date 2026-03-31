@@ -1,0 +1,107 @@
+<%- include('partials/header', { title: 'Bloxball | Live výsledky' }) %>
+
+<section class="hero">
+  <p class="eyebrow">LIVE HUB</p>
+  <h1>Livesport styl pro Bloxburg ligu</h1>
+  <p class="hero-text">Sleduj výsledky, přestupy a profily hráčů v reálném čase. Data může upravovat pouze admin.</p>
+</section>
+
+<section class="grid-two">
+  <article class="panel">
+    <h2>Aktuální zápasy</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Soutěž</th>
+            <th>Zápas</th>
+            <th>Skóre</th>
+            <th>Výkop</th>
+            <th>Stav</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% matches.forEach(match => { %>
+            <tr>
+              <td><%= match.competition_name %></td>
+              <td><%= match.home_name %> vs <%= match.away_name %></td>
+              <td><strong><%= match.home_score %> : <%= match.away_score %></strong></td>
+              <td><%= match.kickoff %></td>
+              <td><span class="status <%= match.status.toLowerCase() %>"><%= match.status %></span></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  </article>
+
+  <article class="panel">
+    <h2>Poslední přestupy</h2>
+    <ul class="transfer-feed">
+      <% latestTransfers.forEach(transfer => { %>
+        <li>
+          <div>
+            <strong><%= transfer.player_name %></strong>
+            <p><%= transfer.from_name || 'Bez klubu' %> → <%= transfer.to_name || 'Bez klubu' %></p>
+          </div>
+          <div class="meta">
+            <span><%= transfer.fee %></span>
+            <small><%= transfer.transfer_date %></small>
+          </div>
+        </li>
+      <% }) %>
+    </ul>
+  </article>
+</section>
+
+<section class="panel admin-section">
+  <h2>Tabulky lig</h2>
+
+  <% if (!leagueTables || leagueTables.length === 0) { %>
+    <p>Zatím není vytvořená žádná liga.</p>
+  <% } %>
+
+  <% (leagueTables || []).forEach(item => { %>
+    <h3><%= item.competition.name %> (<%= item.competition.season %>)</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Tým</th>
+            <th>Z</th>
+            <th>V</th>
+            <th>R</th>
+            <th>P</th>
+            <th>Skóre</th>
+            <th>RG</th>
+            <th>Body</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (item.rows.length === 0) { %>
+            <tr>
+              <td colspan="9">Liga nemá přiřazené týmy.</td>
+            </tr>
+          <% } %>
+
+          <% item.rows.forEach((row, index) => { %>
+            <tr>
+              <td><strong><%= index + 1 %></strong></td>
+              <td><%= row.club_name %></td>
+              <td><%= row.played %></td>
+              <td><%= row.wins %></td>
+              <td><%= row.draws %></td>
+              <td><%= row.losses %></td>
+              <td><%= row.gf %>:<%= row.ga %></td>
+              <td><%= row.gd %></td>
+              <td><strong><%= row.points %></strong></td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% }) %>
+</section>
+
+<%- include('partials/footer') %>

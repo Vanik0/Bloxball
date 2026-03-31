@@ -1,0 +1,120 @@
+<%- include('partials/header', { title: 'Bloxball | Zprávy pro klub' }) %>
+
+<section class="hero small">
+  <p class="eyebrow">CLUB ZONE</p>
+  <h1><%= club.name %> - Zprávy</h1>
+  <form action="/club/logout" method="POST">
+    <button type="submit" class="logout">Odhlásit klub</button>
+  </form>
+</section>
+
+<section class="grid-two">
+  <article class="panel">
+    <h2>Poslat nabídku</h2>
+    <form method="POST" action="/club/message/send">
+      <label>Klub
+        <select name="to_club_id" required>
+          <option value="">-- Vyberte klub --</option>
+          <% clubs.forEach(c => { if (c.id !== club.id) { %>
+            <option value="<%= c.id %>"><%= c.name %></option>
+          <% }}) %>
+        </select>
+      </label>
+      <label>Hráč (volitelně)
+        <select name="player_id">
+          <option value="">Bez konkrétního hráče</option>
+          <% players.forEach(p => { %>
+            <option value="<%= p.id %>"><%= p.full_name %></option>
+          <% }) %>
+        </select>
+      </label>
+      <label class="full">Zpráva
+        <textarea name="message" rows="4" placeholder="Podrobnosti nabídky..." required></textarea>
+      </label>
+      <button type="submit">Poslat zprávu</button>
+    </form>
+  </article>
+</section>
+
+<section class="panel admin-section">
+  <h2>Přijaté zprávy (<%= incomingMessages.filter(m => m.status === 'unread').length %>)</h2>
+  
+  <% if (incomingMessages.length === 0) { %>
+    <p>Žádné zprávy.</p>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Od klubu</th>
+            <th>Hráč</th>
+            <th>Zpráva</th>
+            <th>Datum</th>
+            <th>Stav</th>
+            <th>Akce</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% incomingMessages.forEach(msg => { %>
+            <tr class="<%= msg.status === 'unread' ? 'unread' : '' %>">
+              <td><strong><%= msg.from_club_name %></strong></td>
+              <td><%= msg.player_name || 'Není specifikován' %></td>
+              <td><%= msg.message %></td>
+              <td><small><%= new Date(msg.created_at).toLocaleDateString('cs-CZ') %></small></td>
+              <td><%= msg.status === 'unread' ? 'Nepřečteno' : 'Přečteno' %></td>
+              <td>
+                <% if (msg.status === 'unread') { %>
+                  <form method="POST" action="/club/message/<%= msg.id %>/mark-read" style="display:inline;">
+                    <button type="submit" style="padding:4px 8px;">Přečíst</button>
+                  </form>
+                <% } %>
+                <form method="POST" action="/club/message/<%= msg.id %>/delete" onsubmit="return confirm('Smazat zprávu?');" style="display:inline;">
+                  <button type="submit" class="danger">Smazat</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+
+<section class="panel admin-section">
+  <h2>Odeslané zprávy</h2>
+  
+  <% if (outgoingMessages.length === 0) { %>
+    <p>Žádné odeslané zprávy.</p>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Klubu</th>
+            <th>Hráč</th>
+            <th>Zpráva</th>
+            <th>Datum</th>
+            <th>Akce</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% outgoingMessages.forEach(msg => { %>
+            <tr>
+              <td><strong><%= msg.to_club_name %></strong></td>
+              <td><%= msg.player_name || 'Není specifikován' %></td>
+              <td><%= msg.message %></td>
+              <td><small><%= new Date(msg.created_at).toLocaleDateString('cs-CZ') %></small></td>
+              <td>
+                <form method="POST" action="/club/message/<%= msg.id %>/delete" onsubmit="return confirm('Smazat zprávu?');">
+                  <button type="submit" class="danger">Smazat</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+
+<%- include('partials/footer') %>

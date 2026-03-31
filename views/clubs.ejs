@@ -1,0 +1,20 @@
+<%- include('partials/header', { title: 'BloxScore | Kluby' }) %>
+
+<section class="hero small">
+  <p class="eyebrow">CLUB DIRECTORY</p>
+  <h1>Kluby</h1>
+</section>
+
+<section class="card-grid">
+  <% clubs.forEach(club => { %>
+    <article class="card">
+      <h3><%= club.name %></h3>
+      <p><strong>Země:</strong> <%= club.country %></p>
+      <p><strong>Město:</strong> <%= club.city %></p>
+      <p><strong>Stadion:</strong> <%= club.stadium %></p>
+      <p><strong>Založen:</strong> <%= club.founded %></p>
+    </article>
+  <% }) %>
+</section>
+
+<%- include('partials/footer') %>

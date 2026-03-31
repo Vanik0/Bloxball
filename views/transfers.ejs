@@ -1,0 +1,37 @@
+<%- include('partials/header', { title: 'Bloxball | Přestupy' }) %>
+
+<section class="hero small">
+  <p class="eyebrow">TRANSFER CENTER</p>
+  <h1>Přestupy</h1>
+</section>
+
+<article class="panel">
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Hráč</th>
+          <th>Odkud</th>
+          <th>Kam</th>
+          <th>Poplatek</th>
+          <th>Datum</th>
+          <th>Stav</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% transfers.forEach(transfer => { %>
+          <tr>
+            <td><%= transfer.player_name %></td>
+            <td><%= transfer.from_name || 'Bez klubu' %></td>
+            <td><%= transfer.to_name || 'Bez klubu' %></td>
+            <td><%= transfer.fee %></td>
+            <td><%= transfer.transfer_date %></td>
+            <td><span class="status"><%= transfer.status %></span></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</article>
+
+<%- include('partials/footer') %>

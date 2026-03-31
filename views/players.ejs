@@ -1,0 +1,20 @@
+<%- include('partials/header', { title: 'Bloxball | Hráči' }) %>
+
+<section class="hero small">
+  <p class="eyebrow">PLAYER DATABASE</p>
+  <h1>Hráčské profily</h1>
+</section>
+
+<section class="card-grid">
+  <% players.forEach(player => { %>
+    <article class="card">
+      <h3><%= player.full_name %></h3>
+      <p><strong>Klub:</strong> <%= player.club_name || 'Bez klubu' %></p>
+      <p><strong>2. klub:</strong> <%= player.secondary_clubs || '-' %></p>
+      <p><strong>Hodnota:</strong> <%= player.market_value %></p>
+      <a class="button" href="/players/<%= player.id %>">Detail profilu</a>
+    </article>
+  <% }) %>
+</section>
+
+<%- include('partials/footer') %>

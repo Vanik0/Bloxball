@@ -1,0 +1,24 @@
+<%- include('partials/header', { title: 'Bloxball | Rozhodcí login' }) %>
+
+<section class="hero small">
+  <p class="eyebrow">REFEREE ZONE</p>
+  <h1>Přihlášení rozhodčího</h1>
+</section>
+
+<section class="form-box">
+  <% if (error) { %>
+    <div class="alert alert-error"><%= error %></div>
+  <% } %>
+  
+  <form method="POST" action="/referee/login">
+    <label>Uživatelské jméno
+      <input type="text" name="username" required autofocus />
+    </label>
+    <label>Heslo
+      <input type="password" name="password" required />
+    </label>
+    <button type="submit">Přihlásit se</button>
+  </form>
+</section>
+
+<%- include('partials/footer') %>

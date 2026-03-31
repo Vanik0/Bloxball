@@ -1,0 +1,434 @@
+<%- include('partials/header', { title: 'Bloxball | Admin panel' }) %>
+
+<section class="hero small">
+  <p class="eyebrow">CONTROL ROOM</p>
+  <h1>Admin panel</h1>
+  <form action="/admin/logout" method="POST">
+    <button type="submit" class="logout">Odhlásit admina</button>
+  </form>
+</section>
+
+<section class="admin-section panel">
+  <h2>Přidat soutěž</h2>
+  <form class="form-grid" method="POST" action="/admin/competitions/create">
+    <label>Název <input name="name" required /></label>
+    <label>Země <input name="country" required /></label>
+    <label>Sezóna <input name="season" placeholder="2025/2026" required /></label>
+    <label>Formát
+      <select name="format" required>
+        <option value="league">Liga</option>
+        <option value="cup">Cup</option>
+      </select>
+    </label>
+    <label>Cup dvojzápas
+      <select name="cup_legs" required>
+        <option value="1">1 zápas (single leg)</option>
+        <option value="2">2 zápasy (home/away)</option>
+      </select>
+    </label>
+    <label>Soutěž login uživatel <input name="login_username" /></label>
+    <label>Soutěž login heslo <input type="password" name="login_password" /></label>
+    <button type="submit">Uložit soutěž</button>
+  </form>
+
+  <div class="table-wrap mt">
+    <table>
+      <thead>
+        <tr>
+          <th>Název</th><th>Země</th><th>Sezóna</th><th>Formát</th><th>Cup legs</th><th>Login</th><th>Nové heslo</th><th>Akce</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% competitions.forEach(competition => { %>
+          <tr>
+            <form method="POST" action="/admin/competitions/<%= competition.id %>/update">
+              <td><input name="name" value="<%= competition.name %>" required /></td>
+              <td><input name="country" value="<%= competition.country %>" required /></td>
+              <td><input name="season" value="<%= competition.season %>" required /></td>
+              <td>
+                <select name="format" required>
+                  <option value="league" <%= competition.format === 'cup' ? '' : 'selected' %>>Liga</option>
+                  <option value="cup" <%= competition.format === 'cup' ? 'selected' : '' %>>Cup</option>
+                </select>
+              </td>
+              <td>
+                <select name="cup_legs" required>
+                  <option value="1" <%= (competition.cup_legs || 1) === 1 ? 'selected' : '' %>>1</option>
+                  <option value="2" <%= Number(competition.cup_legs || 1) === 2 ? 'selected' : '' %>>2</option>
+                </select>
+              </td>
+              <td><input name="login_username" value="<%= competition.login_username || '' %>" /></td>
+              <td><input type="password" name="login_password" placeholder="Ponech prázdné pro zachování" /></td>
+              <td class="actions">
+                <button type="submit">Upravit</button>
+            </form>
+            <form method="POST" action="/admin/competitions/<%= competition.id %>/generate-matches" style="display:inline;" onsubmit="return confirm('Generovat zápasy na základě round-robin rozvrhu? Stávající UPCOMING zápasy budou smazány.');">
+                <button type="submit">Generovat</button>
+            </form>
+            <form method="POST" action="/admin/competitions/<%= competition.id %>/shuffle-matches" style="display:inline;" onsubmit="return confirm('Losovat zápasy náhodně? Stávající UPCOMING zápasy budou smazány.');">
+                <button type="submit">Slosovat</button>
+            </form>
+            <form method="POST" action="/admin/competitions/<%= competition.id %>/delete" onsubmit="return confirm('Smazat soutěž?');">
+                <button type="submit" class="danger">Smazat</button>
+            </form>
+              </td>
+          </tr>
+          <tr>
+            <td colspan="8">
+              <strong>Týmy v soutěži:</strong>
+              <% const competitionTeams = competitionTeamsByCompetition[competition.id] || []; %>
+              <% if (competitionTeams.length === 0) { %>
+                <span>zatím žádné</span>
+              <% } else { %>
+                <% competitionTeams.forEach(team => { %>
+                  <form method="POST" action="/admin/competitions/<%= competition.id %>/teams/<%= team.club_id %>/delete" style="display:inline-block; margin: 4px 8px 4px 0;">
+                    <span><%= team.club_name %></span>
+                    <button type="submit" class="danger" style="margin-left:6px;">Odebrat</button>
+                  </form>
+                <% }) %>
+              <% } %>
+
+              <form method="POST" action="/admin/competitions/<%= competition.id %>/teams/add" style="margin-top:10px; display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                <label style="margin:0;">Přidat tým
+                  <select name="club_id" required>
+                    <% clubs.forEach(club => { %>
+                      <option value="<%= club.id %>"><%= club.name %></option>
+                    <% }) %>
+                  </select>
+                </label>
+                <button type="submit">Přidat tým</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="admin-section panel">
+  <h2>Přidat klub</h2>
+  <form class="form-grid" method="POST" action="/admin/clubs/create">
+    <label>Název <input name="name" required /></label>
+    <label>Země <input name="country" required /></label>
+    <label>Město <input name="city" required /></label>
+    <label>Stadion <input name="stadium" required /></label>
+    <label>Založen <input type="number" name="founded" required /></label>
+    <label>Klub login uživatel <input name="login_username" /></label>
+    <label>Klub login heslo <input type="password" name="login_password" /></label>
+    <button type="submit">Uložit klub</button>
+  </form>
+
+  <div class="table-wrap mt">
+    <table>
+      <thead>
+        <tr>
+          <th>Název</th><th>Země</th><th>Město</th><th>Stadion</th><th>Založen</th><th>Login</th><th>Nové heslo</th><th>Akce</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% clubs.forEach(club => { %>
+          <tr>
+            <form method="POST" action="/admin/clubs/<%= club.id %>/update">
+              <td><input name="name" value="<%= club.name %>" required /></td>
+              <td><input name="country" value="<%= club.country %>" required /></td>
+              <td><input name="city" value="<%= club.city %>" required /></td>
+              <td><input name="stadium" value="<%= club.stadium %>" required /></td>
+              <td><input type="number" name="founded" value="<%= club.founded %>" required /></td>
+              <td><input name="login_username" value="<%= club.login_username || '' %>" /></td>
+              <td><input type="password" name="login_password" placeholder="Ponech prázdné pro zachování" /></td>
+              <td class="actions">
+                <button type="submit">Upravit</button>
+            </form>
+            <form method="POST" action="/admin/clubs/<%= club.id %>/delete" onsubmit="return confirm('Smazat klub?');">
+                <button type="submit" class="danger">Smazat</button>
+            </form>
+              </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="admin-section panel">
+  <h2>Přidat hráče</h2>
+  <form class="form-grid" method="POST" action="/admin/players/create">
+    <label>Jméno <input name="full_name" required /></label>
+    <label>Klub
+      <select name="club_id">
+        <option value="">Bez klubu</option>
+        <% clubs.forEach(club => { %>
+          <option value="<%= club.id %>"><%= club.name %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Hodnota <input name="market_value" required /></label>
+    <label class="full">Bio <textarea name="bio" rows="2" required></textarea></label>
+    <button type="submit">Uložit hráče</button>
+  </form>
+
+  <div class="table-wrap mt">
+    <table>
+      <thead>
+        <tr>
+          <th>Jméno</th><th>Klub</th><th>2. tým</th><th>Hodnota</th><th>Bio</th><th>Akce</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% const secondaryMap = (typeof playerSecondaryClubsByPlayer !== 'undefined' && playerSecondaryClubsByPlayer) ? playerSecondaryClubsByPlayer : {}; %>
+        <% players.forEach(player => { %>
+          <% const secondaryClubs = secondaryMap[player.id] || []; %>
+          <tr>
+            <form method="POST" action="/admin/players/<%= player.id %>/update">
+              <td><input name="full_name" value="<%= player.full_name %>" required /></td>
+              <td>
+                <select name="club_id">
+                  <option value="">Bez klubu</option>
+                  <% clubs.forEach(club => { %>
+                    <option value="<%= club.id %>" <%= player.club_id === club.id ? 'selected' : '' %>><%= club.name %></option>
+                  <% }) %>
+                </select>
+              </td>
+              <td><%= secondaryClubs.length > 0 ? secondaryClubs.map(item => item.club_name).join(', ') : 'Žádný' %></td>
+              <td><input name="market_value" value="<%= player.market_value %>" required /></td>
+              <td><input name="bio" value="<%= player.bio %>" required /></td>
+              <td class="actions">
+                <button type="submit">Upravit</button>
+            </form>
+            <form method="POST" action="/admin/players/<%= player.id %>/delete" onsubmit="return confirm('Smazat hráče?');">
+                <button type="submit" class="danger">Smazat</button>
+            </form>
+              </td>
+          </tr>
+          <tr>
+            <td colspan="6" style="background: rgba(0,0,0,0.03);">
+              <div style="display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+                <strong>Správa 2. týmu:</strong>
+                <form method="POST" action="/admin/players/<%= player.id %>/add-club" style="display:flex; gap:6px; align-items:center;">
+                  <select name="club_id" required>
+                    <% let hasAvailableClub = false; %>
+                    <% clubs.forEach(club => { %>
+                      <% const alreadySecondary = secondaryClubs.some(item => item.club_id === club.id); %>
+                      <% if (club.id !== player.club_id && !alreadySecondary) { hasAvailableClub = true; %>
+                        <option value="<%= club.id %>"><%= club.name %></option>
+                      <% } %>
+                    <% }) %>
+                  </select>
+                  <button type="submit" <%= hasAvailableClub ? '' : 'disabled' %>>Přidat 2. tým</button>
+                </form>
+                <% if (secondaryClubs.length > 0) { %>
+                  <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <% secondaryClubs.forEach(item => { %>
+                      <form method="POST" action="/admin/players/<%= player.id %>/remove-club" style="display:inline-flex; gap:6px; align-items:center;">
+                        <input type="hidden" name="club_id" value="<%= item.club_id %>" />
+                        <span><%= item.club_name %></span>
+                        <button type="submit" class="danger" style="padding:4px 8px;">Odebrat</button>
+                      </form>
+                    <% }) %>
+                  </div>
+                <% } %>
+              </div>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="admin-section panel">
+  <h2>Přidat přestup</h2>
+  <form class="form-grid" method="POST" action="/admin/transfers/create">
+    <label>Hráč
+      <select name="player_id" required>
+        <% players.forEach(player => { %>
+          <option value="<%= player.id %>"><%= player.full_name %></option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Z klubu
+      <select name="from_club_id">
+        <option value="">Bez klubu</option>
+        <% clubs.forEach(club => { %><option value="<%= club.id %>"><%= club.name %></option><% }) %>
+      </select>
+    </label>
+    <label>Do klubu
+      <select name="to_club_id">
+        <option value="">Bez klubu</option>
+        <% clubs.forEach(club => { %><option value="<%= club.id %>"><%= club.name %></option><% }) %>
+      </select>
+    </label>
+    <label>Poplatek <input name="fee" required /></label>
+    <label>Datum <input type="date" name="transfer_date" required /></label>
+    <label>Stav <input name="status" placeholder="Dokonceno / Jednani" required /></label>
+    <button type="submit">Uložit přestup</button>
+  </form>
+
+  <div class="table-wrap mt">
+    <table>
+      <thead>
+        <tr><th>Hráč</th><th>Odkud</th><th>Kam</th><th>Poplatek</th><th>Datum</th><th>Stav</th><th>Akce</th></tr>
+      </thead>
+      <tbody>
+        <% transfers.forEach(transfer => { %>
+          <tr>
+            <form method="POST" action="/admin/transfers/<%= transfer.id %>/update">
+              <td>
+                <select name="player_id" required>
+                  <% players.forEach(p => { %>
+                    <option value="<%= p.id %>" <%= transfer.player_id === p.id ? 'selected' : '' %>><%= p.full_name %></option>
+                  <% }) %>
+                </select>
+              </td>
+              <td>
+                <select name="from_club_id">
+                  <option value="">Bez klubu</option>
+                  <% clubs.forEach(club => { %>
+                    <option value="<%= club.id %>" <%= transfer.from_club_id === club.id ? 'selected' : '' %>><%= club.name %></option>
+                  <% }) %>
+                </select>
+              </td>
+              <td>
+                <select name="to_club_id">
+                  <option value="">Bez klubu</option>
+                  <% clubs.forEach(club => { %>
+                    <option value="<%= club.id %>" <%= transfer.to_club_id === club.id ? 'selected' : '' %>><%= club.name %></option>
+                  <% }) %>
+                </select>
+              </td>
+              <td><input name="fee" value="<%= transfer.fee %>" required /></td>
+              <td><input type="date" name="transfer_date" value="<%= transfer.transfer_date %>" required /></td>
+              <td><input name="status" value="<%= transfer.status %>" placeholder="Dokonceno / Jednani" required /></td>
+              <td class="actions">
+                <button type="submit">Upravit</button>
+            </form>
+            <form method="POST" action="/admin/transfers/<%= transfer.id %>/delete" onsubmit="return confirm('Smazat přestup?');">
+                <button type="submit" class="danger">Smazat</button>
+            </form>
+              </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="admin-section panel">
+  <h2>Přidat zápas</h2>
+  <form class="form-grid" method="POST" action="/admin/matches/create">
+    <label>Soutěž
+      <select name="competition_id" required>
+        <% competitions.forEach(competition => { %>
+          <option value="<%= competition.id %>"><%= competition.name %> (<%= competition.season %>)</option>
+        <% }) %>
+      </select>
+    </label>
+    <label>Domácí
+      <select name="home_club_id" required>
+        <% clubs.forEach(club => { %><option value="<%= club.id %>"><%= club.name %></option><% }) %>
+      </select>
+    </label>
+    <label>Hosté
+      <select name="away_club_id" required>
+        <% clubs.forEach(club => { %><option value="<%= club.id %>"><%= club.name %></option><% }) %>
+      </select>
+    </label>
+    <label>Skóre dom. <input type="number" name="home_score" value="0" required /></label>
+    <label>Skóre hosté <input type="number" name="away_score" value="0" required /></label>
+    <label>Výkop <input name="kickoff" placeholder="2026-03-30 19:30" required /></label>
+    <label>Stav <input name="status" placeholder="LIVE / UPCOMING / FT" required /></label>
+    <label>Kolo <input type="number" min="1" name="round_number" value="1" required /></label>
+    <label>Rozhodčí
+      <select name="referee_id">
+        <option value="">Bez rozhodčího</option>
+        <% referees.forEach(ref => { %>
+          <option value="<%= ref.id %>"><%= ref.name %></option>
+        <% }) %>
+      </select>
+    </label>
+    <button type="submit">Uložit zápas</button>
+  </form>
+
+  <div class="table-wrap mt">
+    <table>
+      <thead>
+        <tr><th>Soutěž</th><th>Zápas</th><th>Skóre</th><th>Výkop</th><th>Stav</th><th>Rozhodčí</th><th>Akce</th></tr>
+      </thead>
+      <tbody>
+        <% matches.forEach(match => { %>
+          <tr>
+            <td><%= match.competition_name || match.competition %></td>
+            <td><%= match.home_name %> vs <%= match.away_name %></td>
+            <td>
+              <form method="POST" action="/admin/matches/<%= match.id %>/update-score" style="display:flex; gap:4px; align-items:center;">
+                <input type="number" name="home_score" value="<%= match.home_score %>" style="width:40px;" />
+                <span>:</span>
+                <input type="number" name="away_score" value="<%= match.away_score %>" style="width:40px;" />
+                <select name="status" style="width:90px;">
+                  <option value="UPCOMING" <%= match.status === 'UPCOMING' ? 'selected' : '' %>>UPCOMING</option>
+                  <option value="LIVE" <%= match.status === 'LIVE' ? 'selected' : '' %>>LIVE</option>
+                  <option value="FT" <%= match.status === 'FT' ? 'selected' : '' %>>FT</option>
+                </select>
+                <button type="submit" style="padding:4px 8px;">OK</button>
+              </form>
+            </td>
+            <td><%= match.kickoff %></td>
+            <td><%= match.status %></td>
+            <td><%= match.referee_name || 'Neurčen' %></td>
+            <td>
+              <form method="POST" action="/admin/matches/<%= match.id %>/assign-referee" style="display:flex; gap:4px; align-items:center;">
+                <select name="referee_id" style="flex:1;">
+                  <option value="">Volit rozhodčího</option>
+                  <% referees.forEach(ref => { %>
+                    <option value="<%= ref.id %>" <%= match.referee_id === ref.id ? 'selected' : '' %>><%= ref.name %></option>
+                  <% }) %>
+                </select>
+                <button type="submit" style="padding:4px 8px;">Upravit</button>
+              </form>
+              <form method="POST" action="/admin/matches/<%= match.id %>/delete" onsubmit="return confirm('Smazat zápas?');" style="display:inline;">
+                <button type="submit" class="danger">Smazat</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="admin-section panel">
+  <h2>Správa rozhodčích</h2>
+  <form class="form-grid" method="POST" action="/admin/referees/create">
+    <label>Jméno <input name="name" required /></label>
+    <label>Uživatelské jméno <input name="login_username" required /></label>
+    <label>Heslo <input type="password" name="login_password" required /></label>
+    <button type="submit">Přidat rozhodčího</button>
+  </form>
+
+  <div class="table-wrap mt">
+    <table>
+      <thead>
+        <tr><th>Jméno</th><th>Uživatel</th><th>Nové heslo</th><th>Akce</th></tr>
+      </thead>
+      <tbody>
+        <% referees.forEach(referee => { %>
+          <tr>
+            <form method="POST" action="/admin/referees/<%= referee.id %>/update">
+              <td><input name="name" value="<%= referee.name %>" required /></td>
+              <td><strong><%= referee.login_username %></strong></td>
+              <td><input type="password" name="login_password" placeholder="Ponech prázdné pro zachování" /></td>
+              <td class="actions">
+                <button type="submit">Upravit</button>
+            </form>
+            <form method="POST" action="/admin/referees/<%= referee.id %>/delete" onsubmit="return confirm('Smazat rozhodčího?');">
+                <button type="submit" class="danger">Smazat</button>
+            </form>
+              </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+
+<%- include('partials/footer') %>

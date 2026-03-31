@@ -1,0 +1,22 @@
+<%- include('partials/header', { title: 'BloxScore | Admin login' }) %>
+
+<section class="auth-box">
+  <h1>Admin přihlášení</h1>
+  <p>Jen admin může upravovat hráče, kluby, přestupy a zápasy.</p>
+
+  <% if (error) { %>
+    <p class="error"><%= error %></p>
+  <% } %>
+
+  <form method="POST" action="/admin/login" class="form-grid">
+    <label>Uživatelské jméno
+      <input type="text" name="username" required />
+    </label>
+    <label>Heslo
+      <input type="password" name="password" required />
+    </label>
+    <button type="submit">Přihlásit</button>
+  </form>
+</section>
+
+<%- include('partials/footer') %>

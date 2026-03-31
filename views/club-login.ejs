@@ -1,0 +1,22 @@
+<%- include('partials/header', { title: 'BloxScore | Klub login' }) %>
+
+<section class="auth-box">
+  <h1>Klubové přihlášení</h1>
+  <p>Přístup do panelu má pouze klub s nastaveným loginem od admina.</p>
+
+  <% if (error) { %>
+    <p class="error"><%= error %></p>
+  <% } %>
+
+  <form method="POST" action="/club/login" class="form-grid">
+    <label>Uživatelské jméno klubu
+      <input type="text" name="username" required />
+    </label>
+    <label>Heslo
+      <input type="password" name="password" required />
+    </label>
+    <button type="submit">Přihlásit klub</button>
+  </form>
+</section>
+
+<%- include('partials/footer') %>

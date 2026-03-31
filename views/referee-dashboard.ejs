@@ -1,0 +1,63 @@
+<%- include('partials/header', { title: 'Bloxball | Rozhodcí panel' }) %>
+
+<section class="hero small">
+  <p class="eyebrow">REFEREE ZONE</p>
+  <h1>Rozhodčí panel - <%= referee.name %></h1>
+  <form action="/referee/logout" method="POST">
+    <button type="submit" class="logout">Odhlásit rozhodčího</button>
+  </form>
+</section>
+
+<section class="panel admin-section">
+  <h2>Delegované zápasy</h2>
+  <p>Upravujte skóre a údaje zápasů, dokud je neuavřete. Jakmile zápas zavřete, již jej nebudete moci upravovat.</p>
+  
+  <% if (matches.length === 0) { %>
+    <p>Nejste delegováni do žádného zápasu.</p>
+  <% } else { %>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Soutěž</th>
+            <th>Zápas</th>
+            <th>Skóre</th>
+            <th>Výkop</th>
+            <th>Stav</th>
+            <th>Akce</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% matches.forEach(match => { %>
+            <tr>
+              <td><%= match.competition_name %></td>
+              <td><%= match.home_name %> vs <%= match.away_name %></td>
+              <td>
+                <form method="POST" action="/referee/matches/<%= match.id %>/update" style="display:flex; gap:6px; align-items:center;">
+                  <input type="number" name="home_score" value="<%= match.home_score %>" style="width:50px;" />
+                  <span>:</span>
+                  <input type="number" name="away_score" value="<%= match.away_score %>" style="width:50px;" />
+                  <select name="status" style="width:100px;">
+                    <option value="UPCOMING" <%= match.status === 'UPCOMING' ? 'selected' : '' %>>UPCOMING</option>
+                    <option value="LIVE" <%= match.status === 'LIVE' ? 'selected' : '' %>>LIVE</option>
+                    <option value="FT" <%= match.status === 'FT' ? 'selected' : '' %>>FT</option>
+                  </select>
+                  <button type="submit" style="padding:6px 12px;">Uložit</button>
+                </form>
+              </td>
+              <td><%= match.kickoff %></td>
+              <td><span class="status"><%= match.status %></span></td>
+              <td>
+                <form method="POST" action="/referee/matches/<%= match.id %>/close" onsubmit="return confirm('Zavřít zápas? Již jej nebudete moct upravovat.');">
+                  <button type="submit" class="danger">Zavřít zápas</button>
+                </form>
+              </td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+  <% } %>
+</section>
+
+<%- include('partials/footer') %>

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title><%= title %></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Bebas+Neue&display=swap" rel="stylesheet" />
+  <script>
+    (function () {
+      try {
+        var savedTheme = localStorage.getItem("theme");
+        if (!savedTheme) {
+          savedTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+        document.documentElement.setAttribute("data-theme", savedTheme);
+      } catch (error) {
+        document.documentElement.setAttribute("data-theme", "light");
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <% const pathNow = typeof currentPath === 'string' ? currentPath : ''; %>
+  <% const adminLogged = typeof isAdmin !== 'undefined' ? isAdmin : false; %>
+  <% const clubLogged = typeof isClub !== 'undefined' ? isClub : false; %>
+  <% const competitionLogged = typeof isCompetition !== 'undefined' ? isCompetition : false; %>
+  <% const refereeLogged = typeof isReferee !== 'undefined' ? isReferee : false; %>
+  <div class="bg-noise"></div>
+  <header class="site-header">
+    <a href="/" class="logo" aria-label="Bloxball domů">
+      <img src="/images/bloxball-logo.png" alt="Bloxball logo" class="logo-icon" />
+      <span>|Bloxball</span>
+    </a>
+    <div class="header-controls">
+    <nav class="main-nav">
+      <a href="/" class="<%= pathNow === '/' ? 'active' : '' %>">Live</a>
+      <a href="/competitions" class="<%= pathNow === '/competitions' ? 'active' : '' %>">Soutěže</a>
+      <a href="/players" class="<%= pathNow.startsWith('/players') ? 'active' : '' %>">Hráči</a>
+      <a href="/clubs" class="<%= pathNow === '/clubs' ? 'active' : '' %>">Kluby</a>
+      <a href="/transfers" class="<%= pathNow === '/transfers' ? 'active' : '' %>">Přestupy</a>
+      <% if (clubLogged) { %>
+        <a href="/club" class="<%= pathNow.startsWith('/club') ? 'active' : '' %>">Klub panel</a>
+      <% } else { %>
+        <a href="/club/login" class="<%= pathNow === '/club/login' ? 'active' : '' %>">Klub login</a>
+      <% } %>
+      <% if (competitionLogged) { %>
+        <a href="/competition" class="<%= pathNow.startsWith('/competition') ? 'active' : '' %>">Soutěž panel</a>
+      <% } else { %>
+        <a href="/competition/login" class="<%= pathNow === '/competition/login' ? 'active' : '' %>">Soutěž login</a>
+      <% } %>
+      <% if (refereeLogged) { %>
+        <a href="/referee" class="<%= pathNow.startsWith('/referee') ? 'active' : '' %>">Rozhodčí panel</a>
+      <% } else { %>
+        <a href="/referee/login" class="<%= pathNow === '/referee/login' ? 'active' : '' %>">Rozhodčí login</a>
+      <% } %>
+      <% if (adminLogged) { %>
+        <a href="/admin" class="<%= pathNow.startsWith('/admin') ? 'active' : '' %>">Admin</a>
+      <% } else { %>
+        <a href="/admin/login" class="<%= pathNow === '/admin/login' ? 'active' : '' %>">Admin login</a>
+      <% } %>
+    </nav>
+      <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Přepnout motiv" aria-pressed="false">Tmavý režim</button>
+    </div>
+  </header>
+  <main class="container">

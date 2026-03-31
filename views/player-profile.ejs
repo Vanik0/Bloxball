@@ -1,0 +1,41 @@
+<%- include('partials/header', { title: 'Bloxball | Profil hráče' }) %>
+
+<section class="hero small">
+  <p class="eyebrow">PLAYER PROFILE</p>
+  <h1><%= player.full_name %></h1>
+</section>
+
+<section class="profile-layout">
+  <% const secondaryClubList = typeof secondaryClubs !== 'undefined' && Array.isArray(secondaryClubs) ? secondaryClubs : []; %>
+  <article class="panel">
+    <h2>Základní info</h2>
+    <p><strong>Klub:</strong> <%= player.club_name || 'Bez klubu' %></p>
+    <p><strong>2. klub:</strong> <%= secondaryClubList.length ? secondaryClubList.map(club => club.name).join(', ') : '-' %></p>
+    <p><strong>Tržní hodnota:</strong> <%= player.market_value %></p>
+    <p><strong>Bio:</strong> <%= player.bio %></p>
+  </article>
+
+  <article class="panel">
+    <h2>Historie přestupů</h2>
+    <% if (transfers.length === 0) { %>
+      <p>Zatím nejsou evidovány žádné přestupy.</p>
+    <% } else { %>
+      <ul class="transfer-feed">
+        <% transfers.forEach(transfer => { %>
+          <li>
+            <div>
+              <strong><%= transfer.from_name || 'Bez klubu' %> → <%= transfer.to_name || 'Bez klubu' %></strong>
+              <p><%= transfer.status %></p>
+            </div>
+            <div class="meta">
+              <span><%= transfer.fee %></span>
+              <small><%= transfer.transfer_date %></small>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </article>
+</section>
+
+<%- include('partials/footer') %>

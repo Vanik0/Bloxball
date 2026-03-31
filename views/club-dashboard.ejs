@@ -1,0 +1,89 @@
+<%- include('partials/header', { title: 'Bloxball | Klub panel' }) %>
+
+<section class="hero small">
+  <p class="eyebrow">CLUB ZONE</p>
+  <h1><%= club.name %> - klubový panel</h1>
+  <div style="display:flex; gap:10px;">
+    <a href="/club/messages" class="logout">Zprávy</a>
+    <form action="/club/logout" method="POST" style="display:inline;">
+      <button type="submit" class="logout">Odhlásit klub</button>
+    </form>
+  </div>
+</section>
+
+<section class="grid-two">
+  <article class="panel">
+    <h2>Profil klubu</h2>
+    <p><strong>Země:</strong> <%= club.country %></p>
+    <p><strong>Město:</strong> <%= club.city %></p>
+    <p><strong>Stadion:</strong> <%= club.stadium %></p>
+    <p><strong>Založen:</strong> <%= club.founded %></p>
+  </article>
+
+  <article class="panel">
+    <h2>Kádr</h2>
+    <% if (players.length === 0) { %>
+      <p>Klub zatím nemá přiřazené hráče.</p>
+    <% } else { %>
+      <ul class="transfer-feed">
+        <% players.forEach(player => { %>
+          <li>
+            <div>
+              <strong><%= player.full_name %></strong>
+            </div>
+            <div class="meta">
+              <span><%= player.market_value %></span>
+            </div>
+          </li>
+        <% }) %>
+      </ul>
+    <% } %>
+  </article>
+</section>
+
+<section class="panel admin-section">
+  <h2>Zápasy klubu</h2>
+  <p>Zápasy jsou vytvářeny administrátorem a mohou být upravovány delegovaným rozhodčím.</p>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Soutěž</th><th>Zápas</th><th>Skóre</th><th>Výkop</th><th>Stav</th></tr>
+      </thead>
+      <tbody>
+        <% matches.forEach(match => { %>
+          <tr>
+            <td><%= match.competition_name %></td>
+            <td><%= match.home_name %> vs <%= match.away_name %></td>
+            <td><%= match.home_score %> : <%= match.away_score %></td>
+            <td><%= match.kickoff %></td>
+            <td><span class="status"><%= match.status %></span></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="panel admin-section">
+  <h2>Přestupy klubu</h2>
+  <% if (transfers.length === 0) { %>
+    <p>Žádné přestupy zatím nejsou.</p>
+  <% } else { %>
+    <ul class="transfer-feed">
+      <% transfers.forEach(transfer => { %>
+        <li>
+          <div>
+            <strong><%= transfer.player_name %></strong>
+            <p><%= transfer.from_name || 'Bez klubu' %> → <%= transfer.to_name || 'Bez klubu' %></p>
+          </div>
+          <div class="meta">
+            <span><%= transfer.fee %></span>
+            <small><%= transfer.transfer_date %></small>
+          </div>
+        </li>
+      <% }) %>
+    </ul>
+  <% } %>
+</section>
+
+<%- include('partials/footer') %>

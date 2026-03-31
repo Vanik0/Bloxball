@@ -1,0 +1,22 @@
+<%- include('partials/header', { title: 'BloxScore | Soutěž login' }) %>
+
+<section class="auth-box">
+  <h1>Přihlášení soutěže</h1>
+  <p>Přístup do panelu má pouze soutěž s nastaveným loginem od admina.</p>
+
+  <% if (error) { %>
+    <p class="error"><%= error %></p>
+  <% } %>
+
+  <form method="POST" action="/competition/login" class="form-grid">
+    <label>Uživatelské jméno soutěže
+      <input type="text" name="username" required />
+    </label>
+    <label>Heslo
+      <input type="password" name="password" required />
+    </label>
+    <button type="submit">Přihlásit soutěž</button>
+  </form>
+</section>
+
+<%- include('partials/footer') %>
